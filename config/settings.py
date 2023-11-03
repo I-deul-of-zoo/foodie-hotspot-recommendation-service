@@ -31,6 +31,8 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     "corsheaders",  # CORS
     "drf_yasg",  # swagger
+    
+    'django_apscheduler',
     ]
 
 CUSTOM_APPS = [
@@ -40,6 +42,12 @@ CUSTOM_APPS = [
 ]
 
 INSTALLED_APPS = SYSTEM_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
+
+# default
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a" 
+
+# 자동으로 스케쥴러 실행
+SCHEDULER_DEFAULT = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
