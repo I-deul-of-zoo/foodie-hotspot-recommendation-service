@@ -1,21 +1,17 @@
-import requests
-import jwt 
+import jwt
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
-from .models import User
-from django.shortcuts import get_object_or_404
-import requests
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from .models import User
 from accounts.serializers import UserDetailUpdateSerializers, LocationSerializers
 from accounts.models import Location
 from utils.location import location_load
@@ -49,8 +45,6 @@ class UserDetailsView(RetrieveUpdateAPIView):
         return obj
     
 
-
-
 class LocationListView(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
@@ -79,7 +73,7 @@ class testAPI(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        # location_load.load_to_db()
+        location_load.load_to_db()
         
         return Response({"message": "this is testAPI"})
 
