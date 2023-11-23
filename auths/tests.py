@@ -2,10 +2,7 @@ import pytest, sys, logging
 from rest_framework import status
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
 
-
-    
 @pytest.mark.django_db
 class TestAuthsClass():
     def setup_method(self):
@@ -15,10 +12,9 @@ class TestAuthsClass():
             'password': 'testpassword',
         }
         self.user = get_user_model().objects.create_user(**self.user_data)
-        self.client = APIClient()
         logging.info(sys._getframe(0).f_code.co_name)
 
-    def test_signup(self):
+    def test_signup(self, client):
         # 회원가입 테스트
         url = reverse("auths:signup")
         data = {
@@ -26,11 +22,11 @@ class TestAuthsClass():
             'password': 'newpassword',
         }
         logging.info(sys._getframe(0).f_code.co_name)
-        response = self.client.post(url, data)
+        response = client.post(url, data)
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data
 
-    def test_jwt_login(self):
+    def test_jwt_login(self, client):
         # JWT 로그인 테스트
         url = reverse("auths:jwt-login")
         data = {
@@ -38,7 +34,7 @@ class TestAuthsClass():
             'password': self.user_data['password'],
         }
         logging.info(sys._getframe(0).f_code.co_name)
-        response = self.client.post(url, data)
+        response = client.post(url, data)
         assert response.status_code == status.HTTP_200_OK
         assert 'access_token' in response.data
         assert response.data['username'] == self.user_data['username']
