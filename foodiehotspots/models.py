@@ -50,13 +50,3 @@ class Rate(models.Model):
     score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
     content = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-
-
-
-'''
-[QUESTION]
-유저가 음식점에 남기는 리뷰 점수
-리뷰 전체 평균 점수
-
-
-'''
