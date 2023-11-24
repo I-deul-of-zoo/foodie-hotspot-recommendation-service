@@ -29,7 +29,6 @@ class SignUp(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
-        print(request.data)
 
         if not username or not password:
             raise ParseError(detail="잘못된 요청입니다. username, password 모두 존재해야합니다.")

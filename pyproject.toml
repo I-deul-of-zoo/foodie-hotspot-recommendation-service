@@ -30,3 +30,11 @@ pytest-django = "^4.7.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = "tests.py"
+log_cli="true"
+log_cli_level="DEBUG"
+log_cli_date_format="%Y-%m-%d %H:%M:%S"
+log_cli_format="%(levelname)-8s %(asctime)s %(name)s::%(filename)s:%(lineno)d: %(message)s"
