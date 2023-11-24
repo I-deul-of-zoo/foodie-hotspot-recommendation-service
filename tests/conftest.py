@@ -1,18 +1,12 @@
 import pytest
-#로그인시 받는 토큰을 모든 test에 적용하기 위한 방법
-#로그인 test는 따로 존재 합니다.
+
 from accounts.models import User, Location
 import json
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from typing import Iterable
-
-import pytest
-
-from django_redis import get_redis_connection
-
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django_redis import get_redis_connection
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +28,6 @@ def user():
 def access_token(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
-
 
 @pytest.fixture()
 def access_db(db):
