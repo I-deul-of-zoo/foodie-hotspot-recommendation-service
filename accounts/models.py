@@ -19,6 +19,9 @@ class Location(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
+    class Meta:
+        ordering = ['id']  # 필요한 필드를 지정
+
     def __str__(self):
         return f"{self.dosi}, {self.sgg}: [{self.longitude}, {self.latitude}]"
     

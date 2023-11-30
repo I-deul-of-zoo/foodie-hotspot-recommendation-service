@@ -5,7 +5,8 @@ from config import settings
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
-from rest_framework import mixins, status
+from rest_framework import status
+from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.exceptions import ParseError
@@ -30,7 +31,7 @@ class CustomPagination(PageNumberPagination):
 class RestaurantList(ListAPIView):
     '''
     GET /api/restaurant/?lat=37.4&lon=127.08
-    GET /api/restaurant/?lat=37.4&lon=127.08&radius=3.0&sorting=score
+    GET /api/restaurant/?lat=37.4&lon=127.08&radius=3.0&sorting=average_score
     '''
     permissions_classes = [AllowAny]
 
@@ -69,10 +70,10 @@ class RestaurantList(ListAPIView):
             within_radius.sort(key=lambda x: x[0])
             sorted_restaurant = [r[1] for r in within_radius]  # sorted_distance_restaurant
         
-        # score 내림차순 정렬
-        elif sorting == 'score':
-            within_radius.sort(key=lambda x: x[1].score, reverse=True)
-            sorted_restaurant = [r[1] for r in within_radius]  # sorted_score_restaurant
+        # average_score 내림차순 정렬
+        elif sorting == 'average_score':
+            within_radius.sort(key=lambda x: x[1].average_score, reverse=True)
+            sorted_restaurant = [r[1] for r in within_radius]  # sorted_averageScore_restaurant
         else:
             raise ParseError()
         
@@ -110,7 +111,7 @@ def lat_lon_to_km(point_1, point_2):
     return R * c
 
 
-class FoodieDetailsView(mixins.RetrieveModelMixin, GenericAPIView):
+class FoodieDetailsView(RetrieveModelMixin, GenericAPIView):
     serializer_class = FoodieDetailsSerializers
     # JWT 인증방식 클래스 지정하기
     authentication_classes = [JWTAuthentication]
@@ -161,7 +162,7 @@ class FoodieDetailsView(mixins.RetrieveModelMixin, GenericAPIView):
         # print(obj.score)
         # print(type(obj.score))  # float
         # print(obj.rates.count())
-        if obj.rates.count() >= 5 and obj.score >= 4.0 :
+        if obj.rates.count() >= 5 and obj.average_score >= 4.0 :
             cache.set(cache_key, serializer.data, 600)
 
         return Response(
@@ -169,34 +170,41 @@ class FoodieDetailsView(mixins.RetrieveModelMixin, GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
-class EvalCreateView(mixins.CreateModelMixin, GenericAPIView):
-    permission_classes = [IsAuthenticated]
+class EvalCreateView(CreateModelMixin, GenericAPIView):
+    authentication_classes = [JWTAuthentication]  # 인증
+    permission_classes = [IsAuthenticated]  # 권한(인가)
     serializer_class = EvalCreateSerializers
-		
-    # JWT 인증방식 클래스 지정하기
-    authentication_classes = [JWTAuthentication]
-    
-    
-    #1. 현재 음식점의 obj를 불러와 해당 score을 업데이트
-    def create(self, request, *args, **kwargs):
-        
-        # 평가 가 생성되면, 해당 맛집의 평점 을 업데이트 한다.
-        # 평균 계산하여 업데이트
-        pk = self.kwargs.get('pk')
-        instance = get_object_or_404(Restaurant, id=pk)
-        cnt = instance.count()
-        #평균 구하는 값변경
-        instance.score = (int(instance.score)*cnt + int(request.data.get('score')))/(cnt + 1)
-        instance.save()
 
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        # 평가 데이터를 저장
         self.perform_create(serializer)
+
+        # 평가가 생성되면 해당 맛집의 평점을 업데이트
+        restaurant_id = self.kwargs.get('pk')
+        restaurant_object = get_object_or_404(Restaurant, id=restaurant_id)
+        rate_score = int(request.data.get('score'))
+
+        # 현재까지의 총 평점과 평가 횟수 가져오기
+        total_rate_count = restaurant_object.rates.count()
+        total_score = restaurant_object.average_score * total_rate_count
+        
+        # 새로운 평가 반영하여 평균 계산
+        new_total_score = total_score + rate_score
+        new_average_score = new_total_score / (total_rate_count + 1)
+        
+        # 맛집의 평균점수 업데이트
+        restaurant_object.average_score = new_average_score
+        restaurant_object.save()
+
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
-    
-    #2. 함께 들어온 'score'와 'content'가 user_id와 content_id가 같이 들어가야함
+        return Response(
+            serializer.data, 
+            status=status.HTTP_201_CREATED, 
+            headers=headers
+        )
+
     def get_object(self, request):
         token_str = request.headers.get("Authorization").split(' ')[1]
         data = jwt.decode(token_str, SECRET_KEY, ALGORITHM)
@@ -205,4 +213,3 @@ class EvalCreateView(mixins.CreateModelMixin, GenericAPIView):
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-
