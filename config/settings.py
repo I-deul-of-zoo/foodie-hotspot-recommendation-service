@@ -128,18 +128,18 @@ else:
         }
     }
 
-CACHE_TTL = 30  # Time to live
+# CACHE_TTL = 30  # Time to live
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
-        # 'OPTIONS': {
-        #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        # }
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
+#         # 'OPTIONS': {
+#         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         # }
+#     }
+# }
 
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # SESSION_CACHE_ALIAS = "default"

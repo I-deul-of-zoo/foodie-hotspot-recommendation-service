@@ -37,5 +37,7 @@ class Location(models.Model):
                 record.save()
         else:
             record = self.save()
-        
+            
+    class Meta:
+        ordering =['id']
         
