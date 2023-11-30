@@ -32,7 +32,7 @@ class Restaurant(models.Model):
     latitude = models.CharField(max_length=100) # 위도
 
     name_address = models.CharField(max_length=255, unique=True) # name + address_roadnm
-    score = models.FloatField(default=0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])# 평가점수
+    average_score = models.FloatField(default=0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])  # 평균점수
     
     def save(self, *args, **kwagrs):
         if self.name_address:
@@ -47,6 +47,6 @@ class Restaurant(models.Model):
 class Rate(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="rates")
-    score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
-    content = models.CharField(max_length=255)
+    score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])  # 평가점수
+    content = models.CharField(max_length=255)  # 평가내용
     created_at = models.DateTimeField(auto_now_add=True)
