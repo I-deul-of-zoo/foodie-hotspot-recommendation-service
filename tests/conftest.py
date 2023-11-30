@@ -1,5 +1,5 @@
 import pytest
-
+import pytest, sys, logging
 from accounts.models import User, Location
 import json
 from typing import Iterable
@@ -16,16 +16,25 @@ def django_db_setup(django_db_setup, django_db_blocker):
         connection.flushdb()
         yield
         connection.flushdb()
+@pytest.fixture(scope="session")
+def user_data():
+    user_data = {
+        'username':'testuser',
+        'password':'testpassword'
+    }
+    return user_data
 
-@pytest.fixture
-def user():
+@pytest.fixture(scope="session")
+def user(user_data):
     return get_user_model().objects.create_user(
-        username='testuser',
-        password='testpassword'
+        username=user_data['username'],
+        password=user_data['password']
     )
+    
 
 @pytest.fixture
 def access_token(user):
+    
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
 
@@ -49,3 +58,7 @@ def create_dummy_restaurant(access_db):
         for i, row in enumerate(csv_to_list):
             row["name_address"] = row["name"] + row["address_roadnm"] + row["address_lotno"]
             Restaurant.objects.create(**row)
+            
+
+        
+        
