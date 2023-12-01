@@ -1,4 +1,5 @@
 from pathlib import Path
+from celery.schedules import crontab
 import os
 import environ
 from datetime import timedelta
@@ -151,6 +152,25 @@ CACHES = {
         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         # }
     }
+}
+
+#CELERY_settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_ENABLE_UTC= False
+
+#주기적인 작업 스케쥴링 
+CELERY_BEAT_SCHEDULE = {
+    'restaurant_scheduler': {
+        'task': 'foodiehotspots.tasks.restaurant_scheduler_task',
+        'schedule': crontab(hour=2, minute=0), #매일 오전 2시
+    },
+    'discord_scheduler': {
+        'task': 'foodiehotspots.tasks.discord_scheduler_task',
+        'schedule': crontab(hour=10, minute=55),  
+    },
 }
 
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"

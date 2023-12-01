@@ -10,5 +10,5 @@ class FoodiehotspotsConfig(AppConfig):
         if os.environ.get('RUN_MAIN', None) is not None:
             if settings.SCHEDULER_DEFAULT:
                 from foodiehotspots import tasks
-                tasks.start()
+                # tasks.start()/
                 # tasks.schedule_process()  # migation 할때 에러나서 일단 주석처리
