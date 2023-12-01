@@ -2,7 +2,7 @@ import pytest
 from mixer.backend.django import mixer
 from django.urls import reverse
 from rest_framework import status
-from tests.conftest import create_restaurant, user
+from tests.conftest import create_restaurant, create_dummy_restaurant, user
 from foodiehotspots.models import Restaurant, Rate
 from foodiehotspots.views import EvalCreateView
 from foodiehotspots.serializers import EvalCreateSerializers
@@ -20,9 +20,9 @@ def create_request_data(restaurant_id, score):
 def expected_average_score(new_score, current_average_score, total_rates):
     return (current_average_score * total_rates + new_score) / (total_rates + 1)
 
-def test_eval_create_view(user, create_restaurant, client, access_token):
+def test_eval_create_view(user, create_dummy_restaurant, client, access_token):
     user = user
-    restaurant = create_restaurant
+    restaurant = create_dummy_restaurant
 
     request_data = create_request_data(restaurant.id, 4)
     restaurant_pk = restaurant.id

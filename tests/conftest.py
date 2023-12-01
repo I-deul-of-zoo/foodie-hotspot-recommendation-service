@@ -20,12 +20,27 @@ ALGORITHM = 'HS256'
 @pytest.fixture
 def api_client():
     return APIClient()
-  
-@pytest.fixture
-def user():
+
+# @pytest.fixture
+# def user():
+#     return get_user_model().objects.create_user(
+#         username="testuser",
+#         password="testpassword",
+#     )
+
+@pytest.fixture(scope="session")
+def user_data():
+    user_data = {
+        'username':'testuser',
+        'password':'testpassword'
+    }
+    return user_data
+
+@pytest.fixture(scope="session")
+def user(user_data):
     return get_user_model().objects.create_user(
-        username="testuser",
-        password="testpassword",
+        username=user_data['username'],
+        password=user_data['password']
     )
 
 @pytest.fixture
@@ -44,7 +59,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
 @pytest.fixture()
 def access_db(db):
     pass
-  
+
 @pytest.fixture()
 def create_locations(access_db):
     from utils.location import location_load
