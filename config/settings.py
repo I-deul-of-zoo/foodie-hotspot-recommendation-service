@@ -161,6 +161,12 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TIMEZONE = 'Asia/Seoul'
 CELERY_ENABLE_UTC= False
 
+#celery task별 다른 worker로 실행하도록 라우팅 처리
+CELERY_TASK_ROUTES = {
+    'foodiehotspots.tasks.restaurant_scheduler_task': {'queue': 'worker1'},
+    'foodiehotspots.tasks.discord_scheduler_task': {'queue': 'worker2'},
+}
+
 #주기적인 작업 스케쥴링 
 CELERY_BEAT_SCHEDULE = {
     'restaurant_scheduler': {
