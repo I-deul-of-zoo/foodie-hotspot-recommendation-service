@@ -73,6 +73,10 @@ def create_restaurant():
 def create_dummy_restaurant(access_db):
     import csv
     from foodiehotspots.models import Restaurant
+    
+    if Restaurant.objects.exists():
+        return
+    
     with open("./utils/restaurant_test_data.csv", "r", encoding="utf-8-sig") as f:
         csv_to_list = list(csv.DictReader(f))
 
