@@ -1,8 +1,5 @@
 import pytest
-from mixer.backend.django import mixer
-from django.urls import reverse
 from rest_framework import status
-
 from foodiehotspots.models import Restaurant, Rate
 from foodiehotspots.views import EvalCreateView
 from foodiehotspots.serializers import EvalCreateSerializers

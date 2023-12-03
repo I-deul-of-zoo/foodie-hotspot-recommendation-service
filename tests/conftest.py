@@ -21,13 +21,6 @@ ALGORITHM = 'HS256'
 def api_client():
     return APIClient()
 
-# @pytest.fixture
-# def user():
-#     return get_user_model().objects.create_user(
-#         username="testuser",
-#         password="testpassword",
-#     )
-
 @pytest.fixture(scope="session")
 def user_data():
     user_data = {
