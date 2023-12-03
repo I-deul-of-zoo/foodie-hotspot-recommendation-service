@@ -1,9 +1,11 @@
 import math
 import requests
 import logging
+import json
 
 from django.core.cache import cache
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.db.models import Count
 
@@ -13,7 +15,7 @@ from .serializers import RestaurantInfoUpdateSerializers, RestaurantSerializer
 
 logger = settings.CUSTOM_LOGGER
 # logger = logging.getLogger(__name__)
-
+User = get_user_model()
 
 class RestaurantScheduler:
     
