@@ -5,6 +5,36 @@ from foodiehotspots.models import Restaurant
 from foodiehotspots.serializers import FoodieDetailsSerializers
 
 
+# @pytest.mark.django_db
+def test_restaurant_detail(client, access_db, access_token, create_dummy_restaurant):
+    
+    # 레스토랑 상세정보?
+    rest_pk = 1
+    expected = Restaurant.objects.get(pk=rest_pk)
+    assert expected
+    
+    #값만 비교하면 되지 않나? serializer로 만든 이유는?
+    # API로 가져온 상세정보와 기대값 비교하여 일치 확인
+    serializer = FoodieDetailsSerializers(expected)
+    expected_data = serializer.data
+    url = f"/api/restaurant/{rest_pk}"
+    response = client.get(url, 
+                        headers={"Authorization": f"Bearer {access_token}"},content_type="application/json")
+        
+    assert response.status_code == 200
+    
+    ## 비교하기 위해 데이터 변형
+    ## QuerySet은 직접 비교가 되지 않습니다.
+    expected_data['related_eval_ids'] = list(expected_data['related_eval_ids'])
+    response.data['related_eval_ids'] = list(response.data['related_eval_ids'])
+    
+    ## 다른 객체이지만 내용물은 모두 같습니다.
+    ## dict와 list는 직접 비교해도 내용물까지 같은지 확인합니다.
+    assert id(dict(expected_data)) != id(dict(response.data))
+    assert dict(expected_data) == dict(response.data)
+
+
+
 # @pytest.fixture(scope="function")
 # def create_testuser_get_token(client, access_db):
 #     # 유저 회원가입
@@ -64,26 +94,4 @@ from foodiehotspots.serializers import FoodieDetailsSerializers
     
 #     assert result.get("dosi") == expected.get("dosi")
 #     assert result.get("sgg") == expected.get("sgg")
-@pytest.mark.django_db
-def test_restaurant_detail(client, access_db, create_dummy_restaurant, access_token):
-    
-    # 레스토랑 상세정보?
-    rest_pk = 1
-    expected = Restaurant.objects.get(pk=rest_pk)
-    assert expected
-    
-    #값만 비교하면 되지 않나? serializer로 만든 이유는?
-    # API로 가져온 상세정보와 기대값 비교하여 일치 확인
-    serializer = FoodieDetailsSerializers(expected)
-    expected_data = serializer.data
-    url = f"/api/restaurant/{rest_pk}"
-    response = client.get(url, 
-                        headers={"Authorization": f"Bearer {access_token}"},content_type="application/json")
-    
-    assert response.status_code == 200
-    assert response.data.get("id") == expected_data.get("id")
-    assert response.data.get("name") == expected_data.get("name")
-    assert response.data.get("name_address") == expected_data.get("name_address")
-    assert response.data.get("sgg") == expected_data.get("sgg")
-    assert response.data.get("sgg_code") == expected_data.get("sgg_code")
-    assert response.data.get("start_date") == expected_data.get("start_date")
+

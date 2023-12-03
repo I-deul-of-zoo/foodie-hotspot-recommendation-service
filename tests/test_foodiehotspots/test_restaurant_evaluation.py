@@ -2,7 +2,7 @@ import pytest
 from mixer.backend.django import mixer
 from django.urls import reverse
 from rest_framework import status
-from tests.conftest import create_restaurant, create_dummy_restaurant, user
+
 from foodiehotspots.models import Restaurant, Rate
 from foodiehotspots.views import EvalCreateView
 from foodiehotspots.serializers import EvalCreateSerializers
@@ -20,10 +20,15 @@ def create_request_data(restaurant_id, score):
 def expected_average_score(new_score, current_average_score, total_rates):
     return (current_average_score * total_rates + new_score) / (total_rates + 1)
 
-def test_eval_create_view(user, create_dummy_restaurant, client, access_token):
-    user = user
-    restaurant = create_dummy_restaurant
-
+def test_eval_create_view(access_db, client, access_token, create_dummy_restaurant):
+    
+    # create_dummy_restaurant를 session으로 하려고 했으나 안됨 (원인 파악 못했습니다.)
+    # 인자로 넣으면 여러번 들어가서 최근에 넣은 last만 가지고 오도록 함.
+    # 왜 다른 index는 못가지고 오는 것인지 모르겠습니다.
+    # ex) id = 10을 주면 가지고 올 수 없더라구요
+    assert Restaurant.objects.exists()
+    
+    restaurant = Restaurant.objects.last()
     request_data = create_request_data(restaurant.id, 4)
     restaurant_pk = restaurant.id
 
@@ -35,14 +40,10 @@ def test_eval_create_view(user, create_dummy_restaurant, client, access_token):
     response = client.post(
         url, 
         headers={"Authorization": f"Bearer {access_token}"},
-        data={
-            "restaurant_id": request_data['restaurant_id'],
-            "score": request_data['score'],
-            "content": request_data['content'],
-        },
+        data=request_data,
         content_type="application/json"
     )
-
+    
     assert response.status_code == status.HTTP_201_CREATED
     assert 'avg_score' in response.data
     assert 'eval_ids' in response.data
@@ -51,10 +52,6 @@ def test_eval_create_view(user, create_dummy_restaurant, client, access_token):
 
     assert object_eval_ids['content'] == "Test content"
     assert object_eval_ids['score'] == 4.0
-
-    # [TODO] Serializer를 통해서 응답 데이터 비교
-    # serializer_data = EvalCreateSerializers(response.data).data
-    # assert serializer_data == response.data
 
     # 레스토랑 평균 평점 업데이트 확인
     updated_restaurant = Restaurant.objects.get(id=restaurant_pk)
