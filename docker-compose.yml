@@ -1,12 +1,69 @@
-version: "3.11"
+# docker-compose.yml
+version: '3.8'
 
 services:
-  redis: # container name
-    image: redis:6.2.6-alpine
-    ports: # 바인딩할 포트:내부 포트
-      - ${REDIS_BINDING_PORT}:${REDIS_PORT}
-    command: redis-server /usr/local/etc/redis/redis.conf
-    volumes: # 마운트할 볼륨 설정
-      - ${REDIS_DATA_PATH}:/data
-      - ${REDIS_DEFAULT_CONFIG_FILE}:/usr/local/etc/redis/redis.conf
-    restart: always
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      # MYSQL_USER: ${DB_USER}
+      # MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql  # MySQL 데이터 디렉토리를 볼륨에 매핑
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # command: --innodb-use-native-aio=0
+    # command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    # restart : always
+
+  redis:
+    image: redis:latest
+    ports:
+    - "6379:6379"
+    volumes:
+      - redis_data:/data  # Redis 데이터 디렉토리를 볼륨에 매핑
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+
+  django:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:  # 환경 변수를 설정합니다.
+        DB_NAME: ${DB_NAME}
+        DB_USER: ${DB_USER}
+        DB_PASSWORD: ${DB_PASSWORD}
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT}
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    depends_on:
+      - mysql
+      - redis
+    hostname: django
+
+volumes:
+  mysql_data:  # MySQL 데이터 디렉토리를 위한 볼륨 정의
+  redis_data:  # Redis 데이터 디렉토리를 위한 볼륨 정의
+
+
+
+# version: "3.11"
+
+# services:
+#   redis: # container name
+#     image: redis:6.2.6-alpine
+#     ports: # 바인딩할 포트:내부 포트
+#       - ${REDIS_BINDING_PORT}:${REDIS_PORT}
+#     command: redis-server /usr/local/etc/redis/redis.conf
+#     volumes: # 마운트할 볼륨 설정
+#       - ${REDIS_DATA_PATH}:/data
+#       - ${REDIS_DEFAULT_CONFIG_FILE}:/usr/local/etc/redis/redis.conf
+#     restart: always
