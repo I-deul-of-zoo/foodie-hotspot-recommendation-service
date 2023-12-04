@@ -1,5 +1,4 @@
 import jwt
-import requests
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from django.http import JsonResponse
