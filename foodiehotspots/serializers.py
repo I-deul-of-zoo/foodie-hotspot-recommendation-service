@@ -22,12 +22,12 @@ class RestaurantSerializer(ModelSerializer):
             'id',
             'longitude', 
             'latitude', 
-            'score'
+            'average_score'
         )
 
     def validate_score(self, value):
         if value < 0 or value > 5:
-            raise serializers.ValidationError("평점(score)은 0에서 5 사이어야 합니다.")
+            raise serializers.ValidationError("평점은 0에서 5 사이어야 합니다.")
         return value
 
 
@@ -44,7 +44,7 @@ class EvalCreateSerializers(ModelSerializer):
         return evals_ids
 
     def get_avg_score(self, obj):
-        return get_object_or_404(Restaurant, id=self.context['view'].kwargs['pk']).score
+        return get_object_or_404(Restaurant, id=self.context['view'].kwargs['pk']).average_score
 
     #create함수는 modelSerializer에서 Model에 validate_data를 저장하기 위해 생성된 함수
     def create(self, validated_data):
@@ -63,7 +63,8 @@ class EvalCreateSerializers(ModelSerializer):
         )
         rate.save()
         return rate
-    # read_onl
+    
+    # read_only
     class Meta:
         model = Rate
         fields = ['score', 'content', 'avg_score', 'eval_ids']
@@ -99,9 +100,7 @@ class FoodieDetailsSerializers(ModelSerializer):
 class RestaurantInfoUpdateSerializers(serializers.ModelSerializer):
     class Meta():
         model = Restaurant
-   
-        exclude = ['name_address','score']
- 
+        exclude = ['name_address','average_score']
     
     def set_name_address(self, validated_data):
         name = validated_data.get('name')

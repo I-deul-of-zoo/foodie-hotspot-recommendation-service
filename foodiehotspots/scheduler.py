@@ -157,7 +157,7 @@ class DiscordWebHooksScheduler:
     def get_lunch_list(self, user, radius=0.5):
         user_point = (float(user.longitude),  float(user.latitude))
         
-        restaurants = Restaurant.objects.all().order_by('-score')
+        restaurants = Restaurant.objects.all().order_by('-average_score')
         rest_infos = set()
         
         while len(rest_infos) <= 5:

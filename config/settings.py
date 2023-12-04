@@ -128,8 +128,8 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    
-CACHE_TTL = 60 * 1500    
+
+CACHE_TTL = 60 * 1500
 
 CACHES = {
     "default": {
@@ -141,18 +141,17 @@ CACHES = {
     }
 }
 
-CACHE_TTL = 30  # Time to live
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
-        # 'OPTIONS': {
-        #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        # }
-    }
-}
+# CACHE_TTL = 30  # Time to live
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
+#         # 'OPTIONS': {
+#         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         # }
+#     }
+# }
 
 #CELERY_settings
 CELERY_BROKER_URL = "redis://localhost:6379"
@@ -181,6 +180,9 @@ CELERY_BEAT_SCHEDULE = {
 
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # SESSION_CACHE_ALIAS = "default"
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 
 # Password validation
