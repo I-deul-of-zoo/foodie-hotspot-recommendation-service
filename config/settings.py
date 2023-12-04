@@ -1,4 +1,5 @@
 from pathlib import Path
+from celery.schedules import crontab
 import os
 import environ
 from datetime import timedelta
@@ -139,6 +140,46 @@ CACHES = {
         }
     }
 }
+
+# CACHE_TTL = 30  # Time to live
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
+#         # 'OPTIONS': {
+#         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         # }
+#     }
+# }
+
+#CELERY_settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_ENABLE_UTC= False
+
+#celery task별 다른 worker로 실행하도록 라우팅 처리
+CELERY_TASK_ROUTES = {
+    'foodiehotspots.tasks.restaurant_scheduler_task': {'queue': 'worker1'},
+    'foodiehotspots.tasks.discord_scheduler_task': {'queue': 'worker2'},
+}
+
+#주기적인 작업 스케쥴링 
+CELERY_BEAT_SCHEDULE = {
+    'restaurant_scheduler': {
+        'task': 'foodiehotspots.tasks.restaurant_scheduler_task',
+        'schedule': crontab(hour=2, minute=0), #매일 오전 2시
+    },
+    'discord_scheduler': {
+        'task': 'foodiehotspots.tasks.discord_scheduler_task',
+        'schedule': crontab(hour=10, minute=55),  
+    },
+}
+
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_CACHE_ALIAS = "default"
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"

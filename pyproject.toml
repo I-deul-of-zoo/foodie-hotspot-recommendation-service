@@ -22,6 +22,7 @@ apscheduler = "^3.10.4"
 django-apscheduler = "^0.6.2"
 mysql = "^0.0.3"
 django-redis = "^5.4.0"
+celery = {extras = ["redis"], version = "^5.3.6"}
 pytest = "^7.4.3"
 pytest-django = "^4.7.0"
 locust = "^2.19.0"

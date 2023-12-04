@@ -1,11 +1,13 @@
 import math
 import requests
+import json
 import logging
 
 from django.core.cache import cache
 from django.conf import settings
 from django.db.utils import IntegrityError
 from django.db.models import Count
+from django.contrib.auth import get_user_model
 
 from .models import Restaurant, Rate
 from utils.get_data import processing_data
@@ -13,7 +15,7 @@ from .serializers import RestaurantInfoUpdateSerializers, RestaurantSerializer
 
 logger = settings.CUSTOM_LOGGER
 # logger = logging.getLogger(__name__)
-
+User = get_user_model()
 
 class RestaurantScheduler:
     
@@ -140,6 +142,7 @@ class DiscordWebHooksScheduler:
         )
         
         url = "https://discord.com/api/webhooks/1169806092138717267/57BBLDa6dr6GgE3p9U2humk-xHQmz1mJQNWUktYDIqUIsqmu5TH8ViQcF7HzcGaD-GQx" #webhook url, from here: https://i.imgur.com/f9XnAew.png
+        # url = "https://discord.com/api/webhooks/1179947607146123294/OVV_zfcv9DB4MBIqo2gbK2L3_oQngKN4BtdxtsQ2HI86p3BATkHGzxd8VC9QNMtYD2IW" #webhook url, from here: https://i.imgur.com/f9XnAew.png
         
         # print(json.dumps(data))
         result = requests.post(url,  headers=headers,  data=json.dumps(data))
