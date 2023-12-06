@@ -7,14 +7,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-      # MYSQL_USER: ${DB_USER}
-      # MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql  # MySQL 데이터 디렉토리를 볼륨에 매핑
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     # command: --innodb-use-native-aio=0
     # command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
-    command:
+    command: 
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     ports:
@@ -43,7 +43,7 @@ services:
         DB_PASSWORD: ${DB_PASSWORD}
         DB_HOST: ${DB_HOST}
         DB_PORT: ${DB_PORT}
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    command: ["./wait-for-it.sh", "mysql:3306", "-t", "60", "--", "python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
       - mysql
       - redis
