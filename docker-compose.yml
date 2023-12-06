@@ -7,6 +7,40 @@ services:
       - ${REDIS_BINDING_PORT}:${REDIS_PORT}
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes: # 마운트할 볼륨 설정
-      - ${REDIS_DATA_PATH}:/data
+      - redis_data:/data
       - ${REDIS_DEFAULT_CONFIG_FILE}:/usr/local/etc/redis/redis.conf
-    restart: always
+
+  backend:
+    container_name: backend
+    build:
+      #Dockerfile이 있는 경로
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - mysql
+      - redis
+      
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql  # MySQL 데이터 디렉토리를 볼륨에 매핑
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # command: --innodb-use-native-aio=0
+    # command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+
+volumes:
+  mysql_data: {} # MySQL 데이터 디렉토리를 위한 볼륨 정의
+  redis_data: {} # Redis 데이터 디렉토리를 위한 볼륨 정의

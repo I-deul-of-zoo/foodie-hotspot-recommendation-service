@@ -28,7 +28,7 @@ def api_client():
 #         password="testpassword",
 #     )
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def user_data():
     user_data = {
         'username':'testuser',
@@ -36,7 +36,7 @@ def user_data():
     }
     return user_data
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def user(user_data):
     return get_user_model().objects.create_user(
         username=user_data['username'],

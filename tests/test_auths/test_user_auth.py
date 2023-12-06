@@ -18,7 +18,7 @@ class TestAuthsClass():
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data
 
-    def test_jwt_login(self, client, user_data):
+    def test_jwt_login(self, client, user, user_data):
         
         # JWT 로그인 테스트
         url = reverse("auths:jwt-login")
