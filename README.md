@@ -1,23 +1,25 @@
-# (2차 과제) foodie hotspot recommendation service based geography
+# Foodie Hotspot Recommendation Service Based Geography
 
 ## 목차
 - [개요](#개요)
-- [요구사항](#요구사항)
+- [요구사항 및 구현사항](#요구사항)
 - [개발환경세팅](#개발환경세팅)
-- [Installation & Run](#Installation)
+- [시스템아키텍쳐](#시스템아키텍쳐)
+- [Installation & Run](#Installation-&-Run)
 - [ER-Diagram](#ER-Diagram)
 - [API Documentation](#API)
+- [Test Code](#Test-Code)
+- [Webhook 기능 구현](#Webhook-기능-구현)
 - [프로젝트 진행 및 이슈 관리](#프로젝트)
 - [구현과정(설계 및 의도)](#구현과정)
 - [TIL 및 회고](#TIL)
+- [일정 관리](#일정-관리)
 - [Authors](#Authors)
-
 
 
 ## 개요
 본 서비스는 공공데이터를 활용하여, 지역 음식점 목록을 자동으로 업데이트 하고 이를 활용합니다. 사용자 위치와 가까운 맛집을 추천하여 더 나은 다양한 음식 경험을 제공하고, 음식을 좋아하는 사람들 간의 소통과 공유를 촉진하려 합니다.
 
-**(내 위치 또는 지정한 위치 기반으로 식당 및 해당 맛집의 메뉴 를 추천한다)**
 
 ### 유저히스토리
 - 유저는 본 사이트에 들어와 회원가입 및 내 위치를 지정한다.
@@ -55,7 +57,7 @@
 
 
 ### 2. 데이터 파이프라인
-- API호출로 동작되는 기능이 아닌 스케쥴러를 통해 매 시간 실행되는 기능들입니다. 클래스, 함수 등 자유롭게 구조하세요.
+- API호출로 동작되는 기능이 아닌 스케쥴러를 통해 매 시간 실행되는 기능들입니다.
 
 #### 데이터 수집
 - [공공데이터포털](https://www.data.go.kr/tcs/dss/selectDataSetList.do?dType=API&keyword=%EA%B2%BD%EA%B8%B0%EB%8F%84+%EC%9D%BC%EB%B0%98%EC%9D%8C%EC%8B%9D%EC%A0%90&operator=AND&detailKeyword=&publicDataPk=&recmSe=&detailText=&relatedKeyword=&commaNotInData=&commaAndData=&commaOrData=&must_not=&tabId=&dataSetCoreTf=&coreDataNm=&sort=_score&relRadio=&orgFullName=&orgFilter=&org=&orgSearch=&currentPage=1&perPage=10&brm=&instt=&svcType=&kwrdArray=&extsn=&coreDataNmArray=&pblonsipScopeCode=) 로 접속하여 연동할 Open API 규격을 확인합니다.
@@ -95,10 +97,9 @@
 
 #### 데이터 전처리
 - 데이터를 내부에서 사용될 형태로 변경합니다.
-    - 변경이 불필요한 경우 그대로 사용하셔도 됩니다.
+    - 변경이 불필요한 경우 그대로 사용합니다.
 - 누락 되거나 이상값을 가질 경우 처리 방침을 정하고 구현합니다.
-    - ex) 누락, null 등 이오면 어떤 값으로 채울지 등
-    - **멘토: 제가 요구하는 어떤 케이스가 존재하지는 않습니다. 개발 중 데이터 이상값이 확인되면, API단이 아닌 이곳에서 전처리되어야 합니다.**
+    - 누락, null 등 이오면 어떤 값으로 채울지 등
 
 #### 데이터 저장
 - 식당 마다 하나의 데이터가(레코드) 존재해야하며, 정보들은 업데이트 되어야 합니다.
@@ -108,17 +109,7 @@
 
 
 #### 자동화
-- 스케쥴러로 자주 사용되는 라이브러리
-    ```markdown
-    1. Django (파이썬 프레임워크):
-    
-    Django-Celery: 비동기 작업 처리를 위한 라이브러리로, 주기적인 작업과 예약 작업을 스케줄링할 수 있습니다.
-    APScheduler: Python에서 주기적인 작업을 실행할 수 있게 해주는 라이브러리로, Django와 함께 사용할 수 있습니다.
-    django-background-tasks: Django 프로젝트에서 주기적인 백그라운드 작업을 스케줄링하고 실행하는 데 도움을 주는 라이브러리입니다.
-    ```
-    
 - `스케쥴러`를 설정하여 위 데이터 파이프라인 로직을 지정한 시간마다 실행시킵니다.
-- 자유롭게 시간과 횟수 등을 설정하세요.
 - 스케쥴러 > 매 6시에 뭘 한다,  6시 28분
 
 
@@ -129,7 +120,6 @@
     - `sgg` : 시군구
     - `lat`: 위도
     - `lon`: 경도
-- 서비스 시작시 로드 하여도 되고, 직접 함수 실행하여 업로드 해도 좋습니다.
 > Location 테이블을 생성하여 시작시 로드하고, 스케쥴러를 이용하여 주기적으로 update하도록 설정했습니다.
 
 ### 3. REST API - 맛집조회
@@ -164,20 +154,20 @@
     - 1.0 지정시 요청 `lat`, `lon` 에서 1km 이내의 가게만 노출 됩니다.
                
 - 기타 `page`, `search` , `filter` 등은 선택사항입니다.
-- 이해를 돕기위한
-    > **Note!**
-    
-    내 주변보기, 특정 지역 보기 등은 유저가 사용하는 기능 명칭입니다. 
-    이는 사용자가 클라이언트에서 클릭하는 값들에 따라 결정되기에,
-    
-    **API 에서는 API 요청된 `lat`, `lon`, `range` 를 토대로 조회된 내용만 반환하면 됩니다.**
-    
-    ex)
-    내 주변 보기 - 도보 > 클라이언트가 `유저 정보` lat, lon 참조 및 range = 1.0(km) 파라메터를 던집니다.
-    내 주변 보기 - 교통수단 > 클라이언트가 `선택된 시군구` lat, lon 참조 및 range = 5.0(km) 파라메터를 던집니다.
-    특정 지역 보기 > 클라이언트가 `선택된 시군구` lat, lon 참조 및 range = 10.0(km) 파라메터를 던집니다.
-    > 
-    - 이는 결국 같은 동작을 하는 API 를 분리하여 관리하지 않고, 하나의 API 로 지원하여 자유도와 유지보수를 돕게 됩니다.
+
+> **Note!**
+
+내 주변보기, 특정 지역 보기 등은 유저가 사용하는 기능 명칭입니다. 
+이는 사용자가 클라이언트에서 클릭하는 값들에 따라 결정되기에,
+
+**API 에서는 API 요청된 `lat`, `lon`, `range` 를 토대로 조회된 내용만 반환하면 됩니다.**
+
+ex)
+내 주변 보기 - 도보 > 클라이언트가 `유저 정보` lat, lon 참조 및 range = 1.0(km) 파라메터를 던집니다.
+내 주변 보기 - 교통수단 > 클라이언트가 `선택된 시군구` lat, lon 참조 및 range = 5.0(km) 파라메터를 던집니다.
+특정 지역 보기 > 클라이언트가 `선택된 시군구` lat, lon 참조 및 range = 10.0(km) 파라메터를 던집니다.
+> 
+- 이는 결국 같은 동작을 하는 API 를 분리하여 관리하지 않고, 하나의 API 로 지원하여 자유도와 유지보수를 돕게 됩니다.
 
 #### 맛집 상세정보(API)
 - `맛집 모든필드` 를 포함합니다.
@@ -185,7 +175,6 @@
     - (`평가` 는 아래 참조.)
     - 모든 내역을 생성시간 역순(최신순) 으로 반환합니다.
     - 추가 요구사항 없습니다.
-
 
 ### 4. REST API - 평가
 
@@ -198,7 +187,6 @@
 - `평가` 가 생성되면, 해당 맛집의 `평점` 을 업데이트 한다.
     - 해당 맛집 모든 평가 기록 조회 및 평균 계산하여 업데이트
 
-
 ### 5.대규모 트래픽 대비 캐싱
 - Redis 를 연동합니다.
 
@@ -207,23 +195,17 @@
 - 데이터 특성상 만료 기간은 없거나 일반 API 보다 길어도 됩니다.
 
 #### 맛집 상세정보 고도화(API)
-- 1단계
-```plain text
-1. 캐시에 저장되었는지 확인.
+- 1단계: 캐시에 저장되었는지 확인.
 	1. 저장되어 있으면, 캐싱 데이터 반환한다.
 	2. 저장되어 있지 않으면, DB를 통해 데이터 불러온다.
-		2-1. 캐시에 저장 하고(600초 등 자율적으로 삭제 deadline 설정)
-    2-3. 연산된 데이터를 반환한다.
-```
-- 2단계
-```plain text
-2-1. 단계에서 모든 데이터를 캐싱하는것이 아닌
- 2-1-1. N개 이상의 평가가 존재하는(=인기있는)맛집만 캐싱
- 2-1-2. "조회 수" 필드를 신설하여 관리하고, 조회수 N 이상만 캐싱
- 2-1-3. 기타 맛집의 인기 또는 추천율이 높음을 증명하는 지표.(자유롭게 구상)
+		- 캐시에 저장 하고(600초 등 자율적으로 삭제 deadline 설정)
+    3. 연산된 데이터를 반환한다.
 
-위 1~3 중 적용
-```
+- 2단계 (아래 1~3 중 적용) 모든 데이터를 캐싱하는것이 아닌
+    1. N개 이상의 평가가 존재하는(=인기있는)맛집만 캐싱
+    2. "조회 수" 필드를 신설하여 관리하고, 조회수 N 이상만 캐싱
+    3. 기타 맛집의 인기 또는 추천율이 높음을 증명하는 지표.(자유롭게 구상)
+
 
 ### 6. Notification
 #### Discord Webhook 을 활용한 점심 추천 서비스
@@ -233,18 +215,63 @@
     - 500 미터 이내의 맛집을 카테고리별로 5개씩 제공한다.
 
 
-
 ## 개발환경세팅
-가상환경: ![pyenv](https://img.shields.io/badge/pyenv-virtualenv-red)
+- 가상환경: ![pyenv](https://img.shields.io/badge/pyenv-virtualenv-red)
 
-언어 및 프레임워크: ![Python](https://img.shields.io/badge/python-3670A0?&logo=python&logoColor=ffdd54) ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?&logo=django&logoColor=white&color=ff1709&labelColor=gray)
+- 언어 및 프레임워크: ![Python](https://img.shields.io/badge/python-3670A0?&logo=python&logoColor=ffdd54) ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?&logo=django&logoColor=white&color=ff1709&labelColor=gray)
 
-데이터 베이스: ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?&logo=mysql&logoColor=white)
+- 데이터 베이스: ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%2300f.svg?&logo=redis&logoColor=#DC382D)
 
 
+## 시스템 아키텍처
+<img width="800" alt="System-Architecture" src="https://user-images.githubusercontent.com/51039577/288967830-dd2ad720-0d47-421a-bb07-c769d397ac8b.png">
+
+
 ## Installation & Run
-### MySQL DB 세팅
+
+### ✅ Docker 사용 실행 방법
+- (전제) Docker 환경이 세팅되어 있습니다.
+### 0. env 파일 구성 예제
+```
+SECRET_KEY='...'   # 장고 기본 비밀키
+API_KEY='...'   # 공공데이터
+
+DB_NAME='foodie'
+DB_USER='myuser'
+DB_ROOT_PASSWORD="rootpassword"
+DB_PASSWORD='devpassword'
+DB_HOST='mysql'
+DB_PORT=3306
+
+REDIS_HOST='redis'
+REDIS_PASSWORD='devpassword'
+REDIS_PORT=6379
+REDIS_DBNUM=1
+```
+### 1. 다음 명령어를 사용해서 container를 띄우세요.
+```shell
+docker compose up
+docker compose up -d   # 혹은 데몬으로 실행
+```
+### 2. 다른 터미널 에서 다음 명령어를 실행하세요. (migrations를 위한 단계)
+```shell
+docker compose exec django python manage.py makemigrations
+docker compose exec django python manage.py migrate
+```
+### 3. 컨테이너를 재시작해주세요
+```shell
+docker compose down
+docker compose up
+```
+### 4. 서버에 접속합니다.
+```
+http://127.0.0.1:8000
+```
+
+### ✅ 로컬에서 실행 환경 세팅
+
+### 1. MySQL DB 세팅
 - DATABASE생성
     - DB_NAME=foodie
     - DB_HOST=localhost
@@ -252,13 +279,11 @@
 - USER생성
     - DB_USER=wanted
     - 유저에게 db권한주기
-
-### 환경 세팅
-
-## 2️⃣ 애플리케이션의 실행 방법 (엔드포인트 호출 방법 포함)
+    
+### 2. 애플리케이션의 실행 방법 (엔드포인트 호출 방법 포함)
 (전제) `python >= 3.10` 과 `mysql >= 8.0` 은 설치되어 있습니다.
 
-#### 1. pyenv와 poetry를 이용해서 가상환경을 세팅해줍니다.
+### 3. pyenv와 poetry를 이용해서 가상환경을 세팅해줍니다.
 1. pip를 이용해서 pyenv와 poetry를 설치해줍니다.
 ```
 pip install pyenv poetry
@@ -276,16 +301,16 @@ pyenv versions
 ```
 pyenv activate <가상환경이름>
 ```
-- windows os는 pyenv를 지원하지 않아 pyenv-win을 설치해야 합니다.
-- 또는 windows 상에서 ubuntu를 사용할 수 있도록 해주는 wsl2를 이용하여 리눅스 상에 pyenv와 poetry를 설치 할 수 있습니다.
+- Windows os는 pyenv를 지원하지 않아 pyenv-win을 설치해야 합니다.
+- 또는 Windows 상에서 Linux를 사용할 수 있도록 해주는 WSL2를 이용하여 리눅스 상에 pyenv와 poetry를 설치 할 수 있습니다.
 
-#### 2. `pyproject.toml` 을 통해 동일한 환경을 만들어줍니다.
+### 4. `pyproject.toml` 을 통해 동일한 환경을 만들어줍니다.
 ```
 poetry install
 ```
 - 위의 명령어 입력시, 현 폴더 위치에 `poetry.lock` 파일 생성 or 업데이트
 
-#### 3. `manage.py` 가 있는 위치에서 모델 migration을 해줍니다.
+### 5. `manage.py` 가 있는 위치에서 모델 migration을 해줍니다.
 ```
 (pyenv run) python manage.py migrate
 ```
@@ -294,15 +319,14 @@ poetry install
 - `python manage.py migrate` : 위의 명령어에서 생성된 마이그레이션 파일들을 데이터베이스에 적용
 (지금은 두번째 명령어만 작성하는게 맞습니다. 변경사항 없이 DB에 적용하기 위함이기 때문입니다.)
 
-#### 4. `manage.py` 가 있는 위치에서 서버를 실행합니다.
+### 6. `manage.py` 가 있는 위치에서 서버를 실행합니다.
 ```
 (pyenv run) python manage.py runserver [port_num]
 ```
 - 필요에 따라 위의 명령어 뒤에 포트번호를 붙입니다.
 
-#### 5. End-point 호출 방법 
+### 7. End-point 호출 방법 
 [참고] Django REST Framework는 admin 패널을 제공합니다. Postman을 사용하지 않아도 (header인증 제외) 웹 상으로 request/response가 가능합니다.
-
 
 <br>
 
@@ -320,13 +344,13 @@ poetry install
 ## ER-Diagram
 <img width="800" alt="ER-Diagram" src="https://user-images.githubusercontent.com/51039577/281304757-83cb5ed2-afed-4277-aae5-353e4cc4eaa9.png">
 
+- 유저의 서비스 사용 시나리오 흐름이 서비스에서 제공한 위치 좌표를 선택해서 활용하는 방식으로 설계되어 있습니다. 따라서 Location 테이블은 다른 테이블과의 관계 없이 위치 정보만을 유저에게 제공하는 테이블이기 때문에 다른 DB와의 관계가 없이 독립적으로 존재하는 구조로 설계하였습니다.
+
 <br>
 
 ## API Documentation
 <img width="800" alt="API-Documentation" src="https://user-images.githubusercontent.com/51039577/281304702-60ff0191-1b6d-4637-aff9-7db70d47af6e.png">
 
-<!-- [TODO]
-아래의 details 태그 안에 각자 구현한 부분 Request/Response 작성하기 -->
 
 <details>
 <summary>1. 회원가입 API - click</summary>
@@ -772,6 +796,31 @@ Vary: Accept
 
 <br>
 
+## Test Code
+- 적용 라이브러리: Pytest
+    - 코드를 간결하게 작성할 수 있고, pytest에서 지원하는 fixture같은 기능을 사용하기 위해서 적용했습니다.
+- 테스크 코드를 한 번에 확인하고 관리하기 위해서 다음과 같은 폴더트리로 구성하였습니다.
+```plaintext
+tests
+  ├── conftest.py
+  ├── test_accounts
+  │   ├── test_location_list.py
+  │   ├── test_user_detail.py
+  │   └── test_user_update.py
+  ├── test_auths
+  │   └── test_user_auth.py
+  └── test_foodiehotspots
+      ├── test_restaurant_detail.py
+      ├── test_restaurant_evaluation.py
+      └── test_restaurant_list.py
+```
+- 결과화면
+<br>
+<img width="800" alt="TestResult" src="https://user-images.githubusercontent.com/51039577/288973515-490cd8a5-ebad-4317-ad27-f54672e65174.png">
+
+
+<br>
+
 ## Webhook 기능 구현
 
 - 서버에서 알림을 주는 기능 구현을 위해 `Webhook`을 사용했습니다.
@@ -781,11 +830,12 @@ Vary: Accept
     - 유저가 알림받기(is_recommend=True)로 설정하면 정해진 시간에 디스코드를 이용해서 알림해줍니다.
     - 유저 이름을 포함시켜 유저를 구분하도록 했습니다.
 - 결과화면
-![결과화면](https://user-images.githubusercontent.com/120071955/281346269-9a073173-76e1-4e7c-aa12-693117e942d9.png)
+<img width="450" alt="Webhook" src="https://user-images.githubusercontent.com/120071955/281346269-9a073173-76e1-4e7c-aa12-693117e942d9.png">
 
 
 ## 프로젝트 진행 및 이슈 관리
-- ![GitHub의 `ISSUE`](https://github.com/I-deul-of-zoo/foodie-hotspot-recommendation-service/issues)로 등록해서 관리했습니다.
+- GitHub의 `ISSUE`로 등록해서 관리했습니다.
+- Link: https://github.com/I-deul-of-zoo/foodie-hotspot-recommendation-service/issues
 
 <br>
 
@@ -803,18 +853,29 @@ Vary: Accept
     - 리소스 간 계층 구조를 나타내는 URI로 구현했습니다.
     - 각 API의 Response에 맞는 HTTP status code를 적절하게 사용하였고, 발생할 수 있는 에러 상황에 대한 예외처리를 진행하였습니다.
 
-3. Scheduler 설계
+3. Scheduler 설계 (ver1)
+    - 목적: 빠른 러닝 커브 및 Django서버 환경에 바로 적용 가능 => 요구사항의 주어진 기한 내 구현 우선
     - 주기적인 데이터 로드 및 전처리 또한 webhook을 구현 위해 APscheduler를 사용하고자 하였습니다.
-    - `Celery`를 사용하기 위해서는 message Broker인 Redis와 함께 사용해야하는데 둘다 리눅스에서 정식 지원할 뿐만아니라, 해당 라이브러리의 환경을 구축하는데 있어 시간이 걸리는 반면, `APscheduler`는 `Celery`보다 구현이 쉬우며 python을 사용하여 DJango에 바로 구현할 수 있다는 장점이 있고 남은 기한이 얼마 남지않아 요구사항부터 충족하고자 `APscheduler`를 우선적으로 사용하는 것으로 결정했습니다.
+    - `Celery`를 사용하기 위해서는 message Broker인 Redis와 함께 사용해야하는데 둘다 리눅스에서 정식 지원할 뿐만아니라, 해당 라이브러리의 환경을 구축하는데 있어 시간이 걸리는 반면, `APscheduler`는 `Celery`보다 구현이 쉬우며 python을 사용하여 Django에 바로 구현할 수 있다는 장점이 있고 남은 기한이 얼마 남지않아 요구사항부터 충족하고자 `APscheduler`를 우선적으로 사용하는 것으로 결정했습니다.
     - 이후, 추가적으로 Docker 환경을 생성하여 Redis와 Celery-beat를 이용한 자동화를 구축 할 예정입니다.
+    
+4. Scheduler 리팩토링 (ver2)
+    - 목적: 진보된 아키텍처 구성-Celery 사용
+    - 두 가지의 스케쥴러가 필요합니다.
+        1. webhook 알림 기능
+        2. 음식점 목록 최신화 기능
+    - 두 스케쥴러 태스크를 각각 처리하는 `restaurant-worker`, `discord-worker`와 정해진 시간마다 task를 발생시켜서 worker에 전달(스케쥴링)해주는 `celery-beat` 로 구성하였습니다.
+    - celery worker 병렬처리
+        - worker를 독립적으로 관리하기 위해 2개의 task를 별개의 worker로 병렬처리하였습니다.
+        - `TASK_ROUTES` 세팅을 사용하여 queue(worker)별로 task를 routing 처리하였고, 각 worker는 docker compose시 task별 다른 컨테이너에서 실행되며 관리됩니다.
 
-4. Redis를 통해 Caching을 진행
+5. Redis를 통해 Caching을 진행
     - 자주 불러오는 '시군구 목록' 및 '맛집 상세 정보'에 대해서 caching 하였습니다.
     - 데이터 일관성을 위해 데이터를 업데이트하거나 일정 시간 이후 조회할 때 캐시가 업데이트 되도록 하였습니다.
     - 데이터 병목 현상을 피하기 위해 TTL(Time to Live)을 사용하여 캐시가 만료되도록 하였습니다.
     - 로컬에서 캐싱이 잘 진행되는지 확인하고, test code로 검증하였습니다.
 
-5. Docker로 Redis 서버 동작
+6. Docker로 Redis 서버 동작
     - redis 서버를 Docker 환경에서 동작하도록 구성해봤습니다.
     - redis를 안정적으로 운영하기 위한 volume 설정과 redis.conf를 생성하고 docker를 이용해 redis 이미지를 다운받고 container를 실행했습니다.
     - 편리한 실행 및 종료를위해 `redis_exec.sh`를 통해 컨테이너를 실행하고, `redis_delete.sh`를 통해 종료시킬 수 있습니다.
@@ -826,6 +887,17 @@ Vary: Accept
     - 결과화면<br>
     ![결과화면](https://user-images.githubusercontent.com/120071955/281397882-778dac69-699a-41ae-a0d4-b201b6814246.png)
 
+7. docker-compose를 사용하여 각각 독립된 컨테이너로 환경 세팅
+    - 컨테이너 구성
+        - APP(Django) 
+        - DB(MySQL)
+        - Redis: 캐싱(caching), 브로커(broker) 겸용
+        - Celery: 워커(worker) 2개, 스케쥴링(scheduling) 1개
+    - 문제 및 해결방법
+        - DB 컨테이너를 세팅하는 과정이 Django를 실행하는 것 보다 시간이 오래 걸려 Django 컨테이너에서 DB Connection 에러가 발생했습니다.
+        - `depends_on` 설정으로는 완료 시간을 보장해주지 않기 때문에 Django 컨테이너 실행 시간을 연기하는 방법이 필요했습니다.
+        - Django 컨테이너 실행 시 DB 컨테이너의 완료 여부를 확인한 뒤 실행하는 스크립트 파일을 설치하여 문제를 해결했습니다.
+
 <br>
 
 ## TIL 및 회고
@@ -835,8 +907,6 @@ Vary: Accept
 ## 일정 관리
 - 요구사항 분석 이후 작업 가능한 최소 단위의 task로 업무를 나누었습니다.
 - 각 task에 대한 우선순위를 설정하고, 노션의 Timeline 기능을 사용하여 주어진 기간 동안 필수 기능과 선택 기능을 모두 구현할 수 있도록 일정 관리를 진행하였습니다.
-- 일정 관리 노션 페이지 [링크](https://sprinkle-piccolo-9fc.notion.site/a13c436918eb44c79b6834dbc8ae0977?pvs=4)
-
 
 <br>
 
