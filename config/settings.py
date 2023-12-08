@@ -129,34 +129,25 @@ else:
         }
     }
 
-CACHE_TTL = 60 * 1500
 
+REDIS_HOST = env('REDIS_HOST')
+REDIS_PORT = env('REDIS_PORT')
+REDIS_DBNUM = env('REDIS_DBNUM')
+
+CACHE_TTL = 60 * 1500
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{env('REDIS_HOST')}:{env('REDIS_PORT')}/1",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DBNUM}",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
 
-# CACHE_TTL = 30  # Time to live
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-#         # 'BACKEND': 'django.core.cache.backends.cache.CacheClass',
-#         'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis 서버 주소 및 포트
-#         # 'OPTIONS': {
-#         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#         # }
-#     }
-# }
-
 #CELERY_settings
-CELERY_BROKER_URL = f"redis://{env('REDIS_HOST')}:{env('REDIS_PORT')}"
-CELERY_RESULT_BACKEND = f"redis://{env('REDIS_HOST')}:{env('REDIS_PORT')}"
-
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TIMEZONE = 'Asia/Seoul'
 CELERY_ENABLE_UTC= False
 
